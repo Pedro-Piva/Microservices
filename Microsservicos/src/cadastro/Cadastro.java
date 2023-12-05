@@ -17,49 +17,52 @@ public class Cadastro extends Thread {
 
     private final ServerSocket servidor;
     boolean isOn;
-    ArrayList<ArrayList<String>> bd = new ArrayList();
+    ArrayList<User> bd = new ArrayList();
     Socket mensageria;
 
     public Cadastro() throws IOException {
         this.servidor = new ServerSocket(8081);
-        ArrayList<String> login = new ArrayList();
-        login.add("adm");
-        ArrayList<String> senha = new ArrayList();
-        senha.add("0000");
-        bd.add(login);
-        bd.add(senha);
-        System.out.println("cadastro.Cadastro.java: " + bd.get(0) + " " + bd.get(1));
+        User adm = new User("adm", "adm", "0000", 100, 999999);
+        bd.add(adm);
+        System.out.println("cadastro.Cadastro.java: " + bd.get(0).getLogin() + " " + bd.get(0).getSenha());
 
         int porta = 9999;
         InetAddress ip = InetAddress.getByName("localhost");
         mensageria = new Socket(ip, porta);
-        
+
         DataOutputStream output = new DataOutputStream(mensageria.getOutputStream());
         String enviar = "Cadastro";
         byte[] tipoEnviar = enviar.getBytes();
         output.write(tipoEnviar);
-        
+
         System.out.println("cadastro.Cadastro.java: criado");
         isOn = true;
     }
 
+    public boolean isOn() {
+        return isOn;
+    }
+
     public void closeServer() throws IOException {
         isOn = false;
+        try{
+            servidor.close();
+        } catch(IOException ex){
+            System.out.println("cadastro.Cadastro.java.closeServer(): Erro");
+        }
+        System.out.println("cadastro.Cadastro.java.closeServer(): servidor fechado");
     }
 
-    public void openServer() throws IOException {
-        isOn = true;
-    }
-
-    public void addUser(String login, String senha) throws IOException {
-        this.bd.get(0).add(login);
-        this.bd.get(1).add(senha);
+    public void addUser(String nome, String login, String senha, int idade, float saldo) throws IOException {
+        User u = new User(nome, login, senha, idade, saldo);
+        bd.add(u);
         mandarMensageria(login, senha);
         System.out.println("cadastro.Cadastro.java.addUser() " + login + ":" + senha);
     }
 
     public boolean verificaLogin(String login) {
-        for (String s : bd.get(0)) {
+        for (User u : bd) {
+            String s = u.getLogin();
             if (s.equals(login)) {
                 System.out.println("cadastro.Cadastro.java.VerificaLogin() " + login + " Ja existente");
                 return false;
@@ -70,7 +73,6 @@ public class Cadastro extends Thread {
     }
 
     public void mandarMensageria(String login, String senha) throws IOException {
-        //DataInputStream input = new DataInputStream(mensageria.getInputStream());
         DataOutputStream output = new DataOutputStream(mensageria.getOutputStream());
         String enviar = login + ":" + senha;
         byte[] loginEnviar = enviar.getBytes();
@@ -81,16 +83,15 @@ public class Cadastro extends Thread {
     public void run() {
         System.out.println("cadastro.Cadastro.java.run(): Thread Rodando");
         try {
-            while (true) {
-                if (isOn) {
-                    Socket user = servidor.accept();
-                    System.out.println("cadastro.Cadastro.java.run(): Cliente " + user.getInetAddress() + " Conectado");
-                    Cadastrar cadastrar = new Cadastrar(user, this);
-                    cadastrar.start();
-                }
+            while (isOn) {
+                Socket user = servidor.accept();
+                System.out.println("cadastro.Cadastro.java.run(): Cliente " + user.getInetAddress() + " Conectado");
+                Cadastrar cadastrar = new Cadastrar(user, this);
+                cadastrar.start();
             }
         } catch (IOException ex) {
             Logger.getLogger(Cadastro.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println("cadastro.Cadastro.java.run(): Thread Finalizada");
     }
 }

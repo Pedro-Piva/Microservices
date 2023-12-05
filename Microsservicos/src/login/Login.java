@@ -28,36 +28,28 @@ public class Login extends Thread {
     @Override
     public void run() {
         try {
-            boolean loop = true;
-            while (loop) {
-                System.out.println("login.Login.java.run() Thread iniciada");
 
-                String enviar = "Informe seu Login: ";
-                byte[] loginEnviar = enviar.getBytes();
-                output.write(loginEnviar);
+            byte[] buf = new byte[4096];
+            input.read(buf);
+            String login = Tratamento.trataEntrada(buf);
+            System.out.println("login.Login.java.run(): Login: " + login);
 
-                byte[] buf = new byte[4096];
-                input.read(buf);
-                String login = Tratamento.trataEntrada(buf);
+            buf = new byte[4096];
+            input.read(buf);
+            String senha = Tratamento.trataEntrada(buf);
+            System.out.println("login.Login.java.run(): Senha: " + senha);
 
-                enviar = "Informe sua Senha: ";
-                byte[] senhaEnviar = enviar.getBytes();
-                output.write(senhaEnviar);
-
-                buf = new byte[4096];
-                input.read(buf);
-                String senha = Tratamento.trataEntrada(buf);
-                
-                if (lc.verificaLoginSenha(login, senha)){
-                    System.out.println("login.Login.java.run(): Login, senha Validos");
-                    enviar = "Logou!";
-                    byte[] logou = enviar.getBytes();
-                    output.write(logou);
-                    lc.logou();
-                    loop = false;
-                } else {
-                    System.out.println("login.Login.java.run(): Login, senha Invalidos");
-                }
+            if (lc.verificaLoginSenha(login, senha)) {
+                System.out.println("login.Login.java.run(): Login, senha Validos");
+                String enviar = "Logou!";
+                byte[] logou = enviar.getBytes();
+                output.write(logou);
+                lc.logou(login, senha);
+            } else {
+                String enviar = "ERRO";
+                byte[] logou = enviar.getBytes();
+                output.write(logou);
+                System.out.println("login.Login.java.run(): Login, senha Invalidos");
             }
 
         } catch (IOException ex) {

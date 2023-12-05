@@ -3,6 +3,7 @@ import cadastro.Cadastro;
 import login.LoginController;
 import produtos.ProdutoController;
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  *
@@ -17,5 +18,8 @@ public class Main {
         LoginController lc = new LoginController();
         lc.start();
         ProdutoController pc = new ProdutoController();
+        pc.start();
+        Scanner sc = new Scanner(System.in);
+        String entrada = "";
     }
 }

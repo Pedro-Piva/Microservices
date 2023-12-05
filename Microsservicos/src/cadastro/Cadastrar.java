@@ -1,4 +1,3 @@
-
 package cadastro;
 
 import tratar.Tratamento;
@@ -6,8 +5,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -32,49 +29,50 @@ public class Cadastrar extends Thread {
     @Override
     public void run() {
         System.out.println("cadastro.Cadastrar.java.run(): Thread iniciada");
-        boolean cadastrado = false;
-        while (!cadastrado) {
-            try {
-                //Enviar para o Cliente
-                String enviar = "Informe um Login Valido: ";
-                byte[] loginEnviar = enviar.getBytes();
-                output.write(loginEnviar);
+        try {
+            byte[] buf = new byte[4096];
+            input.read(buf);
+            String nome = Tratamento.trataEntrada(buf);
+            System.out.println("cadastro.Cadastrar.java.run(): Nome = " + nome);
 
-                //Receber do Cliente
-                byte[] buf = new byte[1024];
-                input.read(buf);
-                String login = Tratamento.trataEntrada(buf);
-                System.out.println("cadastro.Cadastrar.java.run(): User " + login);
+            buf = new byte[4096];
+            input.read(buf);
+            String login = Tratamento.trataEntrada(buf);
+            System.out.println("cadastro.Cadastrar.java.run(): User = " + login);
 
-                //Verificacao de login repetido
-                if (cadastro.verificaLogin(login)) {
-                    //Enviar para o Cliente
-                    enviar = "Informe uma Senha Valida: ";
-                    System.out.println("cadastro.Cadastrar.java.run(): " + enviar);
-                    byte[] senhaEnviar = enviar.getBytes();
-                    output.write(senhaEnviar);
+            buf = new byte[4096];
+            input.read(buf);
+            String senha = Tratamento.trataEntrada(buf);
+            System.out.println("cadastro.Cadastrar.java.run(): Senha = " + senha);
 
-                    //Receber do Cliente
-                    buf = new byte[1024];
-                    input.read(buf);
-                    String senha = Tratamento.trataEntrada(buf);
-                    System.out.println("cadastro.Cadastrar.java.run(): Senha " + senha);
+            buf = new byte[4096];
+            input.read(buf);
+            String idade = Tratamento.trataEntrada(buf);
+            System.out.println("cadastro.Cadastrar.java.run(): idade = " + idade);
 
-                    //Add cadastro no BD
-                    cadastro.addUser(login, senha);
-                    
-                    System.out.println("cadastro.Cadastrar.java.run(): Login: " + login + " Senha: " + senha);
+            buf = new byte[4096];
+            input.read(buf);
+            String saldo = Tratamento.trataEntrada(buf);
+            System.out.println("cadastro.Cadastrar.java.run(): saldo = " + saldo);
 
-                    //Finalizar loop
-                    cadastrado = true;
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(Cadastrar.class.getName()).log(Level.SEVERE, null, ex);
-                cadastrado = true;
-                System.out.println("cadastro.Cadastrar.java.run(): Erro " + ex);
+            int i = Integer.parseInt(idade);
+
+            float s = Float.parseFloat(saldo);
+
+            if (cadastro.verificaLogin(login)) {
+                cadastro.addUser(nome, login, senha, i, s);
+                String acabou = "FIM";
+                byte[] fim = acabou.getBytes();
+                output.write(fim);
+            } else {
+                String acabou = "ERRO";
+                byte[] fim = acabou.getBytes();
+                output.write(fim);
             }
+        } catch (IOException ex) {
+
+            System.out.println("cadastro.Cadastrar.java.run(): Erro " + ex);
         }
         System.out.println("cadastro.Cadastrar.java.run(): Cadastro Finalizado!");
     }
-
 }

@@ -59,8 +59,11 @@ public class LoginController extends Thread {
         return false;
     }
 
-    public void logou(){
-        
+    public void logou(String login, String senha) throws IOException{
+        DataOutputStream output = new DataOutputStream(mensageria.getOutputStream());
+        String enviar = login + ":" + senha + ":True";
+        byte[] tipoEnviar = enviar.getBytes();
+        output.write(tipoEnviar);
     }
     
     @Override
