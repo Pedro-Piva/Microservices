@@ -89,3 +89,38 @@ def produto_send(opcao, user):
         print(f"Erro no Produto: {e}")
     finally:
         client.close()
+
+def pagamento_get(user):
+    try:
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_ip = "localhost"
+        server_port = 8084
+        client.connect((server_ip, server_port))
+        lista = []
+        if user != None:
+            client.send(user.encode("utf-8")[:4096])
+            loop = True
+            while loop:
+                response = client.recv(4096).decode("utf-8").strip("\x00")
+                if response == "FIM":
+                    return lista
+                split = response.split(":")
+                lista.append(split)
+        return lista
+    except Exception as e:
+        print(f"Erro no Pagamento_get: {e}")
+    finally:
+        client.close()
+
+def pagamento_pay(user, saldo_add):
+    try:
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_ip = "localhost"
+        server_port = 8084
+        client.connect((server_ip, server_port))
+        enviar = user + ":" + str(saldo_add)
+        client.send(enviar.encode("utf-8"))
+    except Exception as e:
+        print(f"Erro no Pagamento_send: {e}")
+    finally:
+        client.close()

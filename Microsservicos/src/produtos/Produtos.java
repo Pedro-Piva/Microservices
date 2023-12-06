@@ -4,8 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tratar.Tratamento;
 
 public class Produtos extends Thread {
@@ -32,13 +30,13 @@ public class Produtos extends Thread {
         String acabou = "Acabou";
         byte[] fim = acabou.getBytes();
         output.write(fim);
+        System.out.println("produtos.Produtos.java: MOSTRAR");
     }
 
     @Override
     public void run() {
         System.out.println("produtos.Produtos.java.run(): Rodando");
         try {
-            mostrarItens();
             String acabou = "Acabou";
             byte[] fim = acabou.getBytes();
             output.write(fim);
@@ -50,8 +48,6 @@ public class Produtos extends Thread {
             }
         } catch (IOException ex) {
             System.out.println("produtos.Produtos.java.run(): ERRO: " + ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Produtos.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("produtos.Produtos.java.run(): Finalizado");
     }

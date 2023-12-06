@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 public class Cadastro extends Thread {
 
     private final ServerSocket servidor;
-    boolean isOn;
     ArrayList<User> bd = new ArrayList();
     Socket mensageria;
 
@@ -36,27 +35,13 @@ public class Cadastro extends Thread {
         output.write(tipoEnviar);
 
         System.out.println("cadastro.Cadastro.java: criado");
-        isOn = true;
-    }
-
-    public boolean isOn() {
-        return isOn;
-    }
-
-    public void closeServer() throws IOException {
-        isOn = false;
-        try{
-            servidor.close();
-        } catch(IOException ex){
-            System.out.println("cadastro.Cadastro.java.closeServer(): Erro");
-        }
-        System.out.println("cadastro.Cadastro.java.closeServer(): servidor fechado");
     }
 
     public void addUser(String nome, String login, String senha, int idade, float saldo) throws IOException {
         User u = new User(nome, login, senha, idade, saldo);
         bd.add(u);
-        mandarMensageria(login, senha);
+        mandarMensageriaLogin(login, senha);
+        mandarMensageriaPagamento(login, senha, saldo);
         System.out.println("cadastro.Cadastro.java.addUser() " + login + ":" + senha);
     }
 
@@ -72,9 +57,16 @@ public class Cadastro extends Thread {
         return true;
     }
 
-    public void mandarMensageria(String login, String senha) throws IOException {
+    public void mandarMensageriaLogin(String login, String senha) throws IOException {
         DataOutputStream output = new DataOutputStream(mensageria.getOutputStream());
-        String enviar = login + ":" + senha;
+        String enviar = "LOGIN/CADASTRO/" + login + ":" + senha;
+        byte[] loginEnviar = enviar.getBytes();
+        output.write(loginEnviar);
+    }
+
+    public void mandarMensageriaPagamento(String login, String senha, float saldo) throws IOException {
+        DataOutputStream output = new DataOutputStream(mensageria.getOutputStream());
+        String enviar = "PAGAMENTO/CADASTRO/" + login + ":" + senha + ":" + saldo;
         byte[] loginEnviar = enviar.getBytes();
         output.write(loginEnviar);
     }
@@ -83,7 +75,7 @@ public class Cadastro extends Thread {
     public void run() {
         System.out.println("cadastro.Cadastro.java.run(): Thread Rodando");
         try {
-            while (isOn) {
+            while (true) {
                 Socket user = servidor.accept();
                 System.out.println("cadastro.Cadastro.java.run(): Cliente " + user.getInetAddress() + " Conectado");
                 Cadastrar cadastrar = new Cadastrar(user, this);

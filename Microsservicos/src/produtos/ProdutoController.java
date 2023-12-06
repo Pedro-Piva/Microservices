@@ -18,9 +18,9 @@ import tratar.Tratamento;
 public class ProdutoController extends Thread {
 
     private final ServerSocket servidor;
-    private boolean isOn;
     private Socket mensageria;
     private ArrayList<Item> itens;
+    private ArrayList<String> logins;
 
     public ProdutoController() throws IOException {
         itens = new ArrayList();
@@ -35,17 +35,35 @@ public class ProdutoController extends Thread {
         String enviar = "Produto";
         byte[] tipoEnviar = enviar.getBytes();
         output.write(tipoEnviar);
+        this.logins = new ArrayList();
+        ProdutoDatabase pd = new ProdutoDatabase(this, mensageria);
 
-        isOn = true;
         System.out.println("produtos.ProdutoController.java criado");
     }
 
     public void filaMensageria(int opcao, String login) throws IOException {
-        String enviar = login + ":" + itens.get(opcao).getNome() + ":" + itens.get(opcao).getPreco();
+        String enviar = "PAGAMENTO/PRODUTO/" + login + ":" + itens.get(opcao).getNome() + ":" + itens.get(opcao).getPreco();
         byte[] buf = enviar.getBytes();
         DataOutputStream output = new DataOutputStream(mensageria.getOutputStream());
         output.write(buf);
         System.out.println("produtos.ProdutoController.java.filaMensageria(): " + "{" + enviar + "}");
+    }
+
+    public void addLogin(String login) {
+        logins.add(login);
+        System.out.println("produtos.ProdutoController.java.addLogin(): Login: " + login);
+    }
+
+    public void diminuiEstoque(String produto, int quantidade) {
+        Item it = new Item("", 0, 0);
+        for (Item i : itens) {
+            if (i.getNome().equals(produto)) {
+                it = i;
+                break;
+            }
+        }
+        it.setEstoque(it.getEstoque() - quantidade);
+        System.out.println("produtos.ProdutoController.java.diminuiEstoque(): Produto: " + produto + " Estoque: " + it.getEstoque());
     }
 
     @Override
@@ -63,9 +81,13 @@ public class ProdutoController extends Thread {
                     Produtos prod = new Produtos(user, this);
                     System.out.println("produtos.ProdutoController.java.run(): login: NULL");
                 } else {
-                    Produtos produtos = new Produtos(user, this, login);
-                    System.out.println("produtos.ProdutoController.java.run(): login: " + login);
-                    produtos.start();
+                    System.out.println("produtos.ProdutoController.java.run(): Logins: " + logins);
+                    System.out.println("produtos.ProdutoController.java.run(): Login: " + login);
+                    if (logins.contains(login)) {
+                        Produtos produtos = new Produtos(user, this, login);
+                        System.out.println("produtos.ProdutoController.java.run(): login: " + login);
+                        produtos.start();
+                    }
                 }
             }
         } catch (IOException ex) {

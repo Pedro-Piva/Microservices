@@ -35,9 +35,13 @@ public class LoginDatabase extends Thread {
                 String in = Tratamento.trataEntrada(buf);
                 System.out.println("login.LoginDatabase.java.run(): " + in);
                 String[] split = in.split(":");
-                String login = split[0];
-                String senha = split[1];
-                lc.addDatabase(login, senha);
+                if (split[0].equals("CADASTRO")) {
+                    String login = split[1];
+                    String senha = split[2];
+                    lc.addDatabase(login, senha);
+                }
+                String login = split[1];
+                String senha = split[2];
                 System.out.println("login.LoginDatabase.java.run() Thread login: " + login + " Senha: " + senha);
             }
         } catch (IOException ex) {

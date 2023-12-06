@@ -44,7 +44,7 @@ public class Login extends Thread {
                 String enviar = "Logou!";
                 byte[] logou = enviar.getBytes();
                 output.write(logou);
-                lc.logou(login, senha);
+                lc.mandarMensageriaProduto(login, senha);
             } else {
                 String enviar = "ERRO";
                 byte[] logou = enviar.getBytes();
